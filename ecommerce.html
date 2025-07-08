@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Second-Hand Treasures</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script defer>
+    let basket = [];
+    let currentStep = 0;
+    let currentView = 'clothes';
+
+    const articles = {
+      clothes: ["T-Shirt", "Trousers", "Pants", "Hat", "Shoes"],
+      electronics: ["TV", "Laptop", "Mouse", "Keyboard", "Phone", "Charger"]
+    };
+
+    function renderItems() {
+      const container = document.getElementById('main');
+      container.innerHTML = `
+        <div class="flex justify-around mb-4">
+          <button onclick="switchView('clothes')" class="bg-blue-500 text-white px-4 py-2 rounded">Clothes</button>
+          <button onclick="switchView('electronics')" class="bg-blue-500 text-white px-4 py-2 rounded">Electronics</button>
+          <button onclick="nextStep()" class="bg-green-500 text-white px-4 py-2 rounded">View Basket</button>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          ${articles[currentView].map(item => `
+            <div onclick="addToBasket('${item}')" class="bg-gray-100 p-4 text-center rounded shadow cursor-pointer">${item}</div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function switchView(view) {
+      currentView = view;
+      renderItems();
+    }
+
+    function addToBasket(item) {
+      basket.push(item);
+      alert(`${item} added to basket.`);
+    }
+
+    function renderBasket() {
+      const container = document.getElementById('main');
+      container.innerHTML = `
+        <h2 class="text-xl font-bold mb-4">Your Basket</h2>
+        ${basket.map((item, index) => `
+          <div class="flex justify-between items-center mb-2">
+            <span>${item}</span>
+            <button onclick="removeFromBasket(${index})" class="bg-red-500 text-white px-2 py-1 rounded">Remove</button>
+          </div>
+        `).join('')}
+        <button onclick="nextStep()" class="bg-green-500 text-white px-4 py-2 mt-4 rounded">Confirm Details</button>
+      `;
+    }
+
+    function removeFromBasket(index) {
+      basket.splice(index, 1);
+      renderBasket();
+    }
+
+    function renderDetailsForm() {
+      const container = document.getElementById('main');
+      container.innerHTML = `
+        <input id="firstName" placeholder="First Name" class="block w-full mb-4 p-2 border rounded" />
+        <input id="lastName" placeholder="Last Name" class="block w-full mb-4 p-2 border rounded" />
+        <input id="address" placeholder="Address" class="block w-full mb-4 p-2 border rounded" />
+        <button onclick="nextStep()" class="bg-green-500 text-white px-4 py-2 rounded">Select Payment</button>
+      `;
+    }
+
+    function renderPaymentOptions() {
+      const container = document.getElementById('main');
+      container.innerHTML = ['Apple Pay', 'Card', 'Cash Online'].map(method => `
+        <button onclick="nextStep()" class="w-full mb-4 bg-purple-500 text-white px-4 py-2 rounded">${method}</button>
+      `).join('');
+    }
+
+    function renderSuccess() {
+      const container = document.getElementById('main');
+      container.innerHTML = `
+        <h2 class="text-2xl font-bold mb-4 text-center">Transaction Successful!</h2>
+        <p class="text-center">Thank you for supporting sustainable second-hand shopping!</p>
+      `;
+    }
+
+    function renderStep() {
+      switch (currentStep) {
+        case 0: return renderItems();
+        case 1: return renderBasket();
+        case 2: return renderDetailsForm();
+        case 3: return renderPaymentOptions();
+        case 4: return renderSuccess();
+      }
+    }
+
+    function nextStep() {
+      currentStep++;
+      renderStep();
+    }
+
+    function previousStep() {
+      currentStep = Math.max(currentStep - 1, 0);
+      renderStep();
+    }
+
+    window.onload = renderStep;
+  </script>
+</head>
+<body class="bg-gray-50 p-4">
+  <div class="max-w-xl mx-auto">
+    <div class="flex justify-between items-center mb-4">
+      <button onclick="previousStep()" class="text-blue-500">&larr; Back</button>
+      <h1 class="text-2xl font-bold text-center flex-grow">♻️ Second-Hand Treasures</h1>
+    </div>
+    <div id="main"></div>
+  </div>
+</body>
+</html>
