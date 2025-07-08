@@ -1,0 +1,106 @@
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
+
+const articles = {
+  clothes: ["T-Shirt", "Trousers", "Pants", "Hat", "Shoes"],
+  electronics: ["TV", "Laptop", "Mouse", "Keyboard", "Phone", "Charger"]
+};
+
+export default function SecondHandStore() {
+  const [basket, setBasket] = useState([]);
+  const [view, setView] = useState('clothes');
+  const [step, setStep] = useState(0);
+  const [details, setDetails] = useState({ firstName: '', lastName: '', address: '' });
+  const navigate = useNavigate();
+
+  const addToBasket = (item) => setBasket([...basket, item]);
+  const removeFromBasket = (index) => setBasket(basket.filter((_, i) => i !== index));
+
+  const renderItems = () => (
+    <div className="grid grid-cols-2 gap-4">
+      {articles[view].map((item, index) => (
+        <Card key={index} onClick={() => addToBasket(item)} className="cursor-pointer">
+          <CardContent className="p-4 text-center">{item}</CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+
+  const renderBasket = () => (
+    <div>
+      <h2 className="text-xl font-bold mb-4">Your Basket</h2>
+      {basket.map((item, index) => (
+        <div key={index} className="flex justify-between items-center mb-2">
+          <span>{item}</span>
+          <Button variant="destructive" onClick={() => removeFromBasket(index)}>Remove</Button>
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderDetailsForm = () => (
+    <div className="space-y-4">
+      <Input placeholder="First Name" value={details.firstName} onChange={(e) => setDetails({ ...details, firstName: e.target.value })} />
+      <Input placeholder="Last Name" value={details.lastName} onChange={(e) => setDetails({ ...details, lastName: e.target.value })} />
+      <Input placeholder="Address" value={details.address} onChange={(e) => setDetails({ ...details, address: e.target.value })} />
+    </div>
+  );
+
+  const renderPaymentOptions = () => (
+    <div className="space-y-4">
+      {["Apple Pay", "Card", "Cash Online"].map((method, i) => (
+        <Button key={i} className="w-full" onClick={() => setStep(step + 1)}>{method}</Button>
+      ))}
+    </div>
+  );
+
+  const renderSuccess = () => (
+    <div className="text-center">
+      <h2 className="text-2xl font-bold mb-4">Transaction Successful!</h2>
+      <p>Thank you for supporting sustainable second-hand shopping!</p>
+    </div>
+  );
+
+  const goBack = () => setStep(Math.max(step - 1, 0));
+
+  return (
+    <div className="p-4 max-w-xl mx-auto">
+      <div className="flex justify-between items-center mb-4">
+        {step > 0 && <Button onClick={goBack}>&larr; Back</Button>}
+        <h1 className="text-2xl font-bold text-center flex-grow">♻️ Second-Hand Treasures</h1>
+      </div>
+
+      {step === 0 && (
+        <>
+          <div className="flex justify-around mb-4">
+            <Button onClick={() => setView('clothes')}>Clothes</Button>
+            <Button onClick={() => setView('electronics')}>Electronics</Button>
+            <Button onClick={() => setStep(1)}>View Basket</Button>
+          </div>
+          {renderItems()}
+        </>
+      )}
+
+      {step === 1 && (
+        <>
+          {renderBasket()}
+          <Button className="mt-4" onClick={() => setStep(2)}>Confirm Details</Button>
+        </>
+      )}
+
+      {step === 2 && (
+        <>
+          {renderDetailsForm()}
+          <Button className="mt-4" onClick={() => setStep(3)}>Select Payment</Button>
+        </>
+      )}
+
+      {step === 3 && renderPaymentOptions()}
+
+      {step === 4 && renderSuccess()}
+    </div>
+  );
+}
