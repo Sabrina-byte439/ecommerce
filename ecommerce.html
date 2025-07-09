@@ -39,6 +39,12 @@
 
     function addToBasket(item) {
       basket.push(item);
+      // Track "Added to Basket" event
+      window.amplitude.track('Added to Basket', {
+        item: item,
+        category: currentView,
+        basket_size: basket.length
+      });
       alert(`${item} added to basket.`);
     }
 
@@ -52,13 +58,22 @@
             <button onclick="removeFromBasket(${index})" class="bg-red-500 text-white px-2 py-1 rounded">Remove</button>
           </div>
         `).join('')}
-        <button onclick="nextStep()" class="bg-green-500 text-white px-4 py-2 mt-4 rounded">Confirm Details</button>
+        <button onclick="confirmDetails()" class="bg-green-500 text-white px-4 py-2 mt-4 rounded">Confirm Details</button>
       `;
     }
 
     function removeFromBasket(index) {
       basket.splice(index, 1);
       renderBasket();
+    }
+
+    function confirmDetails() {
+      // Track "Details Confirmed" event
+      window.amplitude.track('Details Confirmed', {
+        basket_items: basket,
+        total_items: basket.length
+      });
+      nextStep();
     }
 
     function renderDetailsForm() {
@@ -71,10 +86,20 @@
       `;
     }
 
+    function selectPayment(method) {
+      // Track "Payment Made" event
+      window.amplitude.track('Payment Made', {
+        payment_method: method,
+        basket_items: basket,
+        total_items: basket.length
+      });
+      nextStep();
+    }
+
     function renderPaymentOptions() {
       const container = document.getElementById('main');
       container.innerHTML = ['Apple Pay', 'Card', 'Cash Online'].map(method => `
-        <button onclick="nextStep()" class="w-full mb-4 bg-purple-500 text-white px-4 py-2 rounded">${method}</button>
+        <button onclick="selectPayment('${method}')" class="w-full mb-4 bg-purple-500 text-white px-4 py-2 rounded">${method}</button>
       `).join('');
     }
 
@@ -118,4 +143,4 @@
     <div id="main"></div>
   </div>
 </body>
-</html>
+</html> 
