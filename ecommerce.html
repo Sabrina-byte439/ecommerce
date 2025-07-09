@@ -12,8 +12,21 @@
     let currentView = 'clothes';
 
     const articles = {
-      clothes: ["T-Shirt", "Trousers", "Pants", "Hat", "Shoes"],
-      electronics: ["TV", "Laptop", "Mouse", "Keyboard", "Phone", "Charger"]
+      clothes: [
+        { id: 'cl_001', name: 'T-Shirt', price: 15.99, category: 'clothes', description: 'Comfortable cotton t-shirt' },
+        { id: 'cl_002', name: 'Trousers', price: 29.99, category: 'clothes', description: 'Smart casual trousers' },
+        { id: 'cl_003', name: 'Pants', price: 19.99, category: 'clothes', description: 'Comfortable everyday pants' },
+        { id: 'cl_004', name: 'Hat', price: 12.99, category: 'clothes', description: 'Stylish baseball cap' },
+        { id: 'cl_005', name: 'Shoes', price: 49.99, category: 'clothes', description: 'Comfortable walking shoes' }
+      ],
+      electronics: [
+        { id: 'el_001', name: 'TV', price: 299.99, category: 'electronics', description: '32-inch LED TV' },
+        { id: 'el_002', name: 'Laptop', price: 599.99, category: 'electronics', description: 'Refurbished laptop' },
+        { id: 'el_003', name: 'Mouse', price: 19.99, category: 'electronics', description: 'Wireless optical mouse' },
+        { id: 'el_004', name: 'Keyboard', price: 39.99, category: 'electronics', description: 'Mechanical keyboard' },
+        { id: 'el_005', name: 'Phone', price: 199.99, category: 'electronics', description: 'Smartphone in good condition' },
+        { id: 'el_006', name: 'Charger', price: 9.99, category: 'electronics', description: 'Universal phone charger' }
+      ]
     };
 
     function renderItems() {
@@ -25,8 +38,12 @@
           <button onclick="nextStep()" class="bg-green-500 text-white px-4 py-2 rounded">View Basket</button>
         </div>
         <div class="grid grid-cols-2 gap-4">
-          ${articles[currentView].map(item => `
-            <div onclick="addToBasket('${item}')" class="bg-gray-100 p-4 text-center rounded shadow cursor-pointer">${item}</div>
+          ${articles[currentView].map(product => `
+            <div onclick="addToBasket('${product.id}')" class="bg-gray-100 p-4 text-center rounded shadow cursor-pointer hover:bg-gray-200">
+              <h3 class="font-bold">${product.name}</h3>
+              <p class="text-sm text-gray-600 mb-2">${product.description}</p>
+              <p class="text-lg font-semibold text-green-600">$${product.price}</p>
+            </div>
           `).join('')}
         </div>
       `;
@@ -37,27 +54,48 @@
       renderItems();
     }
 
-    function addToBasket(item) {
-      basket.push(item);
-      // Track "Added to Basket" event
-      window.amplitude.track('Added to Basket', {
-        item: item,
-        category: currentView,
-        basket_size: basket.length
-      });
-      alert(`${item} added to basket.`);
+    function findProductById(productId) {
+      for (let category in articles) {
+        const product = articles[category].find(p => p.id === productId);
+        if (product) return product;
+      }
+      return null;
+    }
+
+    function addToBasket(productId) {
+      const product = findProductById(productId);
+      if (product) {
+        basket.push(product);
+        // Track "Added to Basket" event
+        window.amplitude.track('Added to Basket', {
+          product_id: product.id,
+          product_name: product.name,
+          price: product.price,
+          category: product.category,
+          basket_size: basket.length
+        });
+        alert(`${product.name} added to basket.`);
+      }
     }
 
     function renderBasket() {
       const container = document.getElementById('main');
+      const totalPrice = basket.reduce((sum, product) => sum + product.price, 0);
+      
       container.innerHTML = `
         <h2 class="text-xl font-bold mb-4">Your Basket</h2>
-        ${basket.map((item, index) => `
-          <div class="flex justify-between items-center mb-2">
-            <span>${item}</span>
+        ${basket.map((product, index) => `
+          <div class="flex justify-between items-center mb-2 p-2 bg-white rounded shadow">
+            <div>
+              <span class="font-medium">${product.name}</span>
+              <span class="text-sm text-gray-600 ml-2">$${product.price}</span>
+            </div>
             <button onclick="removeFromBasket(${index})" class="bg-red-500 text-white px-2 py-1 rounded">Remove</button>
           </div>
         `).join('')}
+        <div class="mt-4 p-4 bg-green-100 rounded">
+          <p class="text-lg font-bold">Total: $${totalPrice.toFixed(2)}</p>
+        </div>
         <button onclick="confirmDetails()" class="bg-green-500 text-white px-4 py-2 mt-4 rounded">Confirm Details</button>
       `;
     }
@@ -68,10 +106,12 @@
     }
 
     function confirmDetails() {
+      const totalPrice = basket.reduce((sum, product) => sum + product.price, 0);
       // Track "Details Confirmed" event
       window.amplitude.track('Details Confirmed', {
-        basket_items: basket,
-        total_items: basket.length
+        basket_items: basket.map(p => ({ id: p.id, name: p.name, price: p.price })),
+        total_items: basket.length,
+        total_value: totalPrice
       });
       nextStep();
     }
@@ -87,20 +127,30 @@
     }
 
     function selectPayment(method) {
+      const totalPrice = basket.reduce((sum, product) => sum + product.price, 0);
       // Track "Payment Made" event
       window.amplitude.track('Payment Made', {
         payment_method: method,
-        basket_items: basket,
-        total_items: basket.length
+        basket_items: basket.map(p => ({ id: p.id, name: p.name, price: p.price })),
+        total_items: basket.length,
+        total_value: totalPrice
       });
       nextStep();
     }
 
     function renderPaymentOptions() {
       const container = document.getElementById('main');
-      container.innerHTML = ['Apple Pay', 'Card', 'Cash Online'].map(method => `
-        <button onclick="selectPayment('${method}')" class="w-full mb-4 bg-purple-500 text-white px-4 py-2 rounded">${method}</button>
-      `).join('');
+      const totalPrice = basket.reduce((sum, product) => sum + product.price, 0);
+      
+      container.innerHTML = `
+        <div class="mb-4 p-4 bg-blue-100 rounded">
+          <h3 class="font-bold mb-2">Order Summary</h3>
+          <p class="text-lg">Total: $${totalPrice.toFixed(2)}</p>
+        </div>
+        ${['Apple Pay', 'Card', 'Cash Online'].map(method => `
+          <button onclick="selectPayment('${method}')" class="w-full mb-4 bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">${method}</button>
+        `).join('')}
+      `;
     }
 
     function renderSuccess() {
