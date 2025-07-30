@@ -13,19 +13,19 @@
 
     const articles = {
       clothes: [
-        { id: 'cl_001', name: 'T-Shirt', price: 15.99, category: 'clothes', description: 'Comfortable cotton t-shirt' },
-        { id: 'cl_002', name: 'Trousers', price: 29.99, category: 'clothes', description: 'Smart casual trousers' },
-        { id: 'cl_003', name: 'Pants', price: 19.99, category: 'clothes', description: 'Comfortable everyday pants' },
-        { id: 'cl_004', name: 'Hat', price: 12.99, category: 'clothes', description: 'Stylish baseball cap' },
-        { id: 'cl_005', name: 'Shoes', price: 49.99, category: 'clothes', description: 'Comfortable walking shoes' }
+        { id: 'cl_001', name: 'T-Shirt', price: 15.99, category: 'clothes', description: 'Comfortable cotton t-shirt', brand:'Trish', sku:'1234', quantity:'' },
+        { id: 'cl_002', name: 'Trousers', price: 29.99, category: 'clothes', description: 'Smart casual trousers', brand:'Sourt", sku:'2341', quantity:' },
+        { id: 'cl_003', name: 'Pants', price: 19.99, category: 'clothes', description: 'Comfortable everyday pants'brand:'Stamp", sku:'3412', quantity:' },
+        { id: 'cl_004', name: 'Hat', price: 12.99, category: 'clothes', description: 'Stylish baseball cap', brand:'Tah", sku:'4123', quantity:' },
+        { id: 'cl_005', name: 'Shoes', price: 49.99, category: 'clothes', description: 'Comfortable walking shoes', brand:'Seoh", sku:'4321', quantity:' }
       ],
       electronics: [
-        { id: 'el_001', name: 'TV', price: 299.99, category: 'electronics', description: '32-inch LED TV' },
-        { id: 'el_002', name: 'Laptop', price: 599.99, category: 'electronics', description: 'Refurbished laptop' },
-        { id: 'el_003', name: 'Mouse', price: 19.99, category: 'electronics', description: 'Wireless optical mouse' },
-        { id: 'el_004', name: 'Keyboard', price: 39.99, category: 'electronics', description: 'Mechanical keyboard' },
-        { id: 'el_005', name: 'Phone', price: 199.99, category: 'electronics', description: 'Smartphone in good condition' },
-        { id: 'el_006', name: 'Charger', price: 9.99, category: 'electronics', description: 'Universal phone charger' }
+        { id: 'el_001', name: 'TV', price: 299.99, category: 'electronics', description: '32-inch LED TV', brand:'Vit", sku:'5678', quantity:' },
+        { id: 'el_002', name: 'Laptop', price: 599.99, category: 'electronics', description: 'Refurbished laptop', brand:'Potpal", sku:'6785', quantity:' },
+        { id: 'el_003', name: 'Mouse', price: 19.99, category: 'electronics', description: 'Wireless optical mouse', brand:'Soum", sku:'7856', quantity:' },
+        { id: 'el_004', name: 'Keyboard', price: 39.99, category: 'electronics', description: 'Mechanical keyboard', brand:'Yek", sku:'8567', quantity:' },
+        { id: 'el_005', name: 'Phone', price: 199.99, category: 'electronics', description: 'Smartphone in good condition',brand:'Eno", sku:'8765', quantity:' },
+        { id: 'el_006', name: 'Charger', price: 9.99, category: 'electronics', description: 'Universal phone charger', brand:'Regra", sku:'7658', quantity:' }
       ]
     };
 
@@ -67,13 +67,18 @@
       if (product) {
         basket.push(product);
         // Track "Added to Basket" event
-        window.amplitude.track('Added to Basket', {
-          product_id: product.id,
-          product_name: product.name,
-          price: product.price,
-          category: product.category,
-          basket_size: basket.length
-        });
+       {
+      product_id: product.id,
+      product_name: product.name,
+      price: product.price,
+      category: product.category,
+      brand: product.brand, 
+      sku: product.sku,     
+      quantity: 1           
+    }
+  ],
+  basket_size: basket.length
+});
         alert(`${product.name} added to basket.`);
       }
     }
