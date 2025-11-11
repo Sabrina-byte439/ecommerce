@@ -123,6 +123,11 @@
       basket.splice(index, 1);
       renderBasket();
     }
+      function goToBasket() {
+  currentStep = 1;
+  viewCart();
+  renderStep();
+      }
 
     function confirmDetails() {
       const totalPrice = basket.reduce((sum, product) => sum + (product.price * product.quantity), 0);
@@ -240,13 +245,10 @@
     <div class="flex justify-between items-center mb-4">
       <button onclick="previousStep()" class="text-blue-500">&larr; Back</button>
       <h1 class="text-2xl font-bold text-center flex-grow">♻️ Second-Hand Treasures</h1>
-      function goToBasket() {
-  currentStep = 1;
-  viewCart();
-  renderStep();
     </div>
     <div id="main"></div>
-  </div> <button
+  </div> 
+  <button
   onclick="goToBasket()"
   aria-label="Next"
   class="fixed right-4 bottom-4 bg-green-600 text-white px-5 py-3 rounded-full shadow-lg hover:bg-green-700"
