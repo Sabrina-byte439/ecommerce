@@ -63,35 +63,50 @@
     }
 
     function addToBasket(productId) {
-      const product = findProductById(productId);
-      if (product) {
-        const existingItem = basket.find(item => item.id === productId);
-        if (existingItem) {
-          existingItem.quantity += 1;
-        } else {
-          basket.push({
-            ...product,
-            quantity: 1
-          });
-        }
-
-        window.amplitude.track('Added to Basket', {
-          products: [{
-            product_id: product.id,
-            product_name: product.name,
-            price: product.price,
-            category: product.category,
-            sku: product.id,
-            brand: 'Second-Hand Treasures',
-            quantity: existingItem ? existingItem.quantity : 1
-          }],
-           cart_size: basket.reduce((sum, item) => sum + item.quantity, 0),
-          cart_value: basket.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-        });
-
-        alert(`${product.name} added to basket.`);
-      }
+     function addToBasket(productId) {
+  const product = findProductById(productId);
+  if (product) {
+    const existingItem = basket.find(item => item.id === productId);
+    if (existingItem) {
+      existingItem.quantity += 1;
+    } else {
+      basket.push({
+        ...product,
+        quantity: 1
+      });
     }
+
+    const qty = existingItem ? existingItem.quantity : 1;
+
+    window.amplitude.track('Added to Basket', {
+      // top-level, analyzable fields
+      product_id: product.id,
+      product_name: product.name,
+      price: product.price,
+      category: product.category,
+      brand: product.brand,
+      sku: product.sku,
+      quantity: qty,
+
+      // aggregate cart metrics
+      cart_size: basket.reduce((sum, item) => sum + item.quantity, 0),
+      cart_value: basket.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+
+      // optional: keep original array (not used for analysis)
+      products: [{
+        product_id: product.id,
+        product_name: product.name,
+        price: product.price,
+        category: product.category,
+        sku: product.id,
+        brand: 'Second-Hand Treasures',
+        quantity: qty
+      }]
+    });
+
+    alert(`${product.name} added to basket.`);
+  }
+}
 
     function renderBasket() {
        viewCart(); //
@@ -143,18 +158,25 @@
     }
 
     function viewCart(){
-      window.amplitude.track('Cart Viewed', {
-        products: basket.map(product => ({
-          product_id: product.id,
-          product_name: product.name,
-          price: product.price,
-          category: product.category,
-          quantity: product.quantity
-        })),
-        cart_size: basket.reduce((sum, item) => sum + item.quantity, 0),
-        cart_value: basket.reduce((sum, p) => sum + (p.price * p.quantity), 0)
-      });
-    }
+  window.amplitude.track('Cart Viewed', {
+    // arrays of primitives (analyzable)
+    product_ids: basket.map(p => p.id),
+    product_names: basket.map(p => p.name),
+    categories: [...new Set(basket.map(p => p.category))],
+
+    cart_size: basket.reduce((sum, item) => sum + item.quantity, 0),
+    cart_value: basket.reduce((sum, p) => sum + (p.price * p.quantity), 0),
+
+    // optional: keep original for completeness (not for analysis)
+    products: basket.map(product => ({
+      product_id: product.id,
+      product_name: product.name,
+      price: product.price,
+      category: product.category,
+      quantity: product.quantity
+    }))
+  });
+}
 
     function selectPayment(method) {
       const totalPrice = basket.reduce((sum, product) => sum + (product.price * product.quantity), 0);
