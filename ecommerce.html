@@ -4,6 +4,11 @@
   <script src="https://cdn.eu.amplitude.com/script/9e96ce9e23c5ab1b715986dbe87a1ac1.js"></script>
 <script>
   window.amplitude.add(window.sessionReplay.plugin({sampleRate: 1}));
+  privacyConfig: {
+    defaultMaskLevel: 'medium',
+    unmaskSelector: ['.public-info', '#main-content'], // your safe-to-unmask selectors
+  }
+}).promise;
   window.amplitude.init('9e96ce9e23c5ab1b715986dbe87a1ac1', {
     serverZone: 'EU',
     fetchRemoteConfig: true,
